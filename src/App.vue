@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <!-- <tree :data="data"></tree> -->
+    <tree ref="tree" :treeData="treeData"></tree>
   </div>
 </template>
 
@@ -15,12 +15,20 @@ export default {
   },
   data () {
     return {
-      data: []
+      treeData: []
     }
   },
   created () {
+    this.data = []
     axios.get('/data.json').then(res => {
-      this.data = res.data
+      const a = performance.now()
+      this.data = JSON.stringify(res.data)
+      const b = performance.now()
+      this.$refs.tree.setData(res.data)
+      const c = performance.now()
+      console.log('a-b', b - a)
+      console.log('a-c', c - a)
+      console.log('b-c', c - b)
     })
   }
 }
