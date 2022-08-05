@@ -6,7 +6,6 @@
 
 <script>
 import tree from './components/tree.vue'
-import axios from 'axios'
 
 export default {
   name: 'App',
@@ -20,21 +19,18 @@ export default {
   },
   created () {
     this.data = []
-    axios.get('/data.json').then(res => {
-      const a = performance.now()
-      this.data = JSON.stringify(res.data)
-      const b = performance.now()
-      this.$refs.tree.setData(res.data)
-      const c = performance.now()
-      console.log('a-b', b - a)
-      console.log('a-c', c - a)
-      console.log('b-c', c - b)
-    })
+  },
+  mounted () {
+    this.$refs.tree.setData()
   }
 }
 </script>
 
 <style lang="less">
+* {
+  margin: 0;
+  padding: 0;
+}
 html, body {
   height: 100%;
 }

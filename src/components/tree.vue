@@ -11,6 +11,8 @@
 <script>
 
 const worker = new Worker('worker.js')
+let now = null
+let i = 1
 export default {
   name: 'tree',
   data () {
@@ -21,24 +23,25 @@ export default {
   },
   created () {
     this.data = []
+
+    worker.onmessage = (e) => {
+      if (typeof e.data === 'string') {
+        this.data = JSON.parse(e.data)
+      } else {
+        this.data = JSON.parse(e.data.data)
+        console.log('onmessage', Date.now() - now)
+        console.log('onmessage startIndex', e.data.startIndex)
+        console.log('onmessage i', i)
+        i += 1
+      }
+      this.treeData = this.data
+    }
   },
   methods: {
-    setData (data) {
-      const start = performance.now()
-      console.log(1, performance.now())
+    setData () {
       worker.postMessage({
-        type: 'init',
-        data: JSON.stringify(data)
+        type: 'init'
       })
-      worker.onmessage = (e) => {
-        console.log(4, Date.now())
-        console.log(5, performance.now())
-        this.data = JSON.parse(e.data)
-        this.treeData = this.data
-        const end = performance.now()
-        console.log(6, performance.now())
-        console.log(end - start)
-      }
     },
     flat (data, level = 1) {
       const res = []
@@ -57,9 +60,19 @@ export default {
       return res
     },
     handleScroll (e) {
+      e.preventDefault()
       const startIndex = Math.floor(e.target.scrollTop / 25)
+      console.log('startIndex', startIndex)
+      if (now) {
+        console.log('scroll', Date.now() - now)
+      }
+      console.log('scroll i', i)
+      now = Date.now()
+      worker.postMessage({
+        startIndex
+      })
       this.scrollTop = e.target.scrollTop
-      this.treeData = this.data.slice(startIndex, startIndex + 50)
+      // this.treeData = this.data.slice(startIndex, startIndex + 50)
     }
   }
 }
@@ -72,7 +85,7 @@ export default {
 }
 
 .container {
-  height: 25025250px;
+  height: 25000000px;
 }
 
 .item {
