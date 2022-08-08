@@ -4,7 +4,10 @@ onmessage = function (e) {
     fetch('./data.json')
       .then(res => res.json())
       .then(res => {
+        const start = performance.now()
         data = flat(res)
+        const end = performance.now()
+        console.log('flat', end - start)
         postMessage(JSON.stringify(data.slice(0, 50)))
       })
   } else {
@@ -16,7 +19,7 @@ onmessage = function (e) {
   }
 }
 
-function flat (data) {
+function handleData (data) {
   const res = []
   while (data.length) {
     const cur = { ...data.shift() }
@@ -26,5 +29,28 @@ function flat (data) {
     }
     delete cur.children
   }
+  return res
+}
+
+function flat (data) {
+  const res = []
+  // let index = 0
+  const loop = (children, level = 1) => {
+    const len = children.length
+
+    for (let i = 0; i < len; i++) {
+      const cur = children[i]
+      res.push({
+        ...cur,
+        level,
+        // __index__: index
+      })
+      // index += 1
+      if (cur.children) {
+        loop(cur.children, level + 1)
+      }
+    }
+  }
+  loop(data)
   return res
 }
